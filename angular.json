@@ -62,7 +62,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "angular-material7-firebase-crud-app:build",
-            "port": 2222
+            // "port": 2222
           },
           "configurations": {
             "production": {
