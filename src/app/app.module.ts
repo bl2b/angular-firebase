@@ -1,45 +1,29 @@
 import { BrowserModule } from '@angular/platform-browser';
-
-import { AppRoutingModule } from './app-routing.module';
-
 import { AppComponent } from './app.component';
-import { AddBookComponent } from './components/add-book/add-book.component';
-import { BookListComponent } from './components/book-list/book-list.component';
-
-/* Angular material */
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AngularMaterialModule } from './material.module';
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-
-/* Firebase */
+import { NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { environment } from 'src/environments/environment';
-
-/* Angular CRUD services */
-import { BookService } from './shared/book.service';
-
-/* Reactive form services in Angular 7 */
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AppRoutingModule } from './app-routing.module';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
     AppComponent,
-    AddBookComponent,
-    BookListComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
     BrowserAnimationsModule,
-    AngularMaterialModule,
+    AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
-    FormsModule,
-    ReactiveFormsModule
+    AngularFireAuthModule,
+    AngularFirestoreModule,
+    ToastrModule.forRoot()
   ],
-  providers: [BookService],
-  bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

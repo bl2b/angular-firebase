@@ -1,22 +1,23 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent, MatDialog } from '@angular/material';
-import { BookService } from './../../shared/book.service';
+import { BookService } from '../book.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Book } from 'src/app/shared/book';
+import { Book } from 'src/app/books/book';
 import { Location } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 
 export interface Language {
   name: string;
 }
 
 @Component({
-  selector: 'app-add-book',
-  templateUrl: './add-book.component.html',
-  styleUrls: ['./add-book.component.css']
+  selector: 'app-book-detail',
+  templateUrl: './book-detail.component.html',
+  styleUrls: ['./book-detail.component.css']
 })
-export class AddBookComponent implements OnInit {
+export class BookDetailComponent implements OnInit {
   visible = true;
   selectable = true;
   removable = true;
@@ -35,13 +36,14 @@ export class AddBookComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     public dialog: MatDialog,
-    private location: Location
+    private location: Location,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit() {
     if (this.bookId) {
       this.bookApi.GetBook(this.bookId).valueChanges().subscribe(data => {
-        this.languageArray = data.languages;
+        this.languageArray = data.languages || [];
         this.bookForm = this.buildBookForm(data);
       });
     } else {
@@ -55,6 +57,7 @@ export class AddBookComponent implements OnInit {
     const index = this.languageArray.indexOf(language);
     if (index >= 0) {
       this.languageArray.splice(index, 1);
+      this.bookForm.markAsDirty();
     }
   }
 
@@ -88,6 +91,7 @@ export class AddBookComponent implements OnInit {
     if (input) {
       input.value = '';
     }
+    this.bookForm.markAsDirty();
   }
 
   /* Date */
@@ -112,20 +116,24 @@ export class AddBookComponent implements OnInit {
     if (this.bookForm.valid && this.bookForm.dirty) {
       this.bookApi.AddBook(this.bookForm.value);
       this.resetForm();
+      this.toastr.success('Successfully added');
+    } else {
+      this.toastr.warning('Please complete the required fields');
     }
   }
 
   updateBook() {
     if (this.bookForm.valid && this.bookForm.dirty) {
       this.bookApi.UpdateBook(this.bookId, this.bookForm.value);
-      this.router.navigate(['books-list']);
+      this.router.navigate(['book']);
       this.dialog.closeAll();
+      this.toastr.success('Successfully updated');
     }
   }
 
   showUpdateDialog(content) {
     this.dialog.open(content, {
-      width: '300px'
+      width: '350px'
     });
   }
 

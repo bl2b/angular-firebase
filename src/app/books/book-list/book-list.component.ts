@@ -1,8 +1,9 @@
-import { Book } from './../../shared/book';
+import { Book } from '../book';
 import { Component, ViewChild } from '@angular/core';
 import { MatPaginator, MatTableDataSource, MatDialog } from '@angular/material';
-import { BookService } from './../../shared/book.service';
-import { FirebaseNode } from 'src/app/shared/firebasenode';
+import { BookService } from '../book.service';
+import { FirebaseNode } from 'src/app/books/firebasenode';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-book-list',
@@ -25,12 +26,13 @@ export class BookListComponent {
   ];
 
   constructor(private bookApi: BookService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private toastr: ToastrService) {
     this.bookApi.GetBookList()
     .snapshotChanges().subscribe((books: FirebaseNode[]) => {
       this.BookData = [];
       books.forEach((item: FirebaseNode) => {
-          const a = (<any>item.payload).toJSON();
+          const a = (item.payload as any).toJSON();
           a.$key = item.key;
           this.BookData.push(a as Book);
         });
@@ -50,11 +52,12 @@ export class BookListComponent {
       this.dataSource.data = data;
       this.bookApi.DeleteBook(e.$key);
       this.dialog.closeAll();
+      this.toastr.success('Successfully deleted');
   }
 
   showDeleteConfirmation(content, i: number, e) {
     this.dialog.open(content, {
-      width: '300px',
+      width: '350px',
       data: {index: i, payload: e}
     });
   }

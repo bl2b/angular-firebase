@@ -1,27 +1,36 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { SignInComponent } from './authenticaton/sign-in/sign-in.component';
+import { SecureInnerPagesGuard } from './authenticaton/secure-inner-pages.guard';
+import { AuthGuard } from './authenticaton/auth.guard';
+import { SignUpComponent } from './authenticaton/sign-up/sign-up.component';
+import { ForgotPasswordComponent } from './authenticaton/forgot-password/forgot-password.component';
+import { VerifyEmailComponent } from './authenticaton/verify-email/verify-email.component';
 
-import { AddBookComponent } from './components/add-book/add-book.component';
-import { BookListComponent } from './components/book-list/book-list.component';
 
+// Include route guard in routes array
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'add-book'
+    canActivate: [SecureInnerPagesGuard],
+    children: [
+      {
+        path: '',
+        loadChildren: './authenticaton/authentication.module#AuthenticationModule'
+      },
+    ]
   },
   {
-    path: 'add-book',
-    component: AddBookComponent
+    path: 'book',
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        loadChildren: './books/book.module#BookModule'
+      },
+    ]
   },
-  {
-    path: 'edit-book/:id',
-    component: AddBookComponent
-  },
-  {
-    path: 'books-list',
-    component: BookListComponent
-  }
+  { path: '', redirectTo: 'book', pathMatch: 'full' }
 ];
 
 @NgModule({
