@@ -22,6 +22,7 @@ export class SecureInnerPagesGuard implements CanActivate {
     if (this.authService.isLoggedIn) {
       this.toastr.warning('Please Logout first');
       this.router.navigate(['book']);
+      return false;
     }
     return true;
   }
