@@ -71,7 +71,15 @@ export class AuthService {
   // Returns true when user is looged in and email is verified
   get isLoggedIn(): boolean {
     const user = JSON.parse(localStorage.getItem('user'));
-    return (user !== null && user.emailVerified !== false) ? true : false;
+    if (user) {
+      if (user.emailVerified === false && user.providerData[0].providerId === 'password') {
+        this.toastr.warning('We sent verifcation to your email. Please have it complete.');
+        return false;
+      }
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // Sign in with Google
@@ -79,12 +87,17 @@ export class AuthService {
     return this.AuthLogin(new auth.GoogleAuthProvider());
   }
 
+  // Sign in with Facebook
+  FacebookAuth() {
+    return this.AuthLogin(new auth.FacebookAuthProvider());
+  }
+
   // Auth logic to run auth providers
   AuthLogin(provider) {
     return this.afAuth.auth.signInWithPopup(provider)
       .then((result) => {
         this.ngZone.run(() => {
-          this.router.navigate(['book/list']);
+          this.router.navigate(['book']);
         });
         this.SetUserData(result.user);
       }).catch((error) => {
