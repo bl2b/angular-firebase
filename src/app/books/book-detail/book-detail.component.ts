@@ -7,10 +7,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Book } from 'src/app/books/book';
 import { Location } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { Language } from '../language';
 
-export interface Language {
-  name: string;
-}
+
 
 @Component({
   selector: 'app-book-detail',
@@ -42,12 +41,16 @@ export class BookDetailComponent implements OnInit {
 
   ngOnInit() {
     if (this.bookId) {
-      this.bookApi.GetBook(this.bookId).valueChanges().subscribe(data => {
+      // this.bookApi.GetBook(this.bookId).valueChanges().subscribe(data => {
+      //   this.languageArray = data.languages || [];
+      //   this.bookForm = this.buildBookForm(data);
+      // });
+      this.bookApi.GetBookViaApi(this.bookId).subscribe((data: Book) => {
         this.languageArray = data.languages || [];
         this.bookForm = this.buildBookForm(data);
       });
     } else {
-      this.bookApi.GetBookList();
+      // this.bookApi.GetBookList();
       this.bookForm = this.buildBookForm({});
     }
   }
@@ -64,6 +67,7 @@ export class BookDetailComponent implements OnInit {
   /* Reactive book form */
   buildBookForm(book: Book): FormGroup {
     return this.fb.group({
+      $key: book.$key,
       book_name: [book.book_name || null, [Validators.required]],
       isbn_10: [book.isbn_10 || null, [Validators.required]],
       author_name: [book.author_name || null, [Validators.required]],
@@ -114,9 +118,11 @@ export class BookDetailComponent implements OnInit {
   /* Submit book */
   submitBook() {
     if (this.bookForm.valid && this.bookForm.dirty) {
-      this.bookApi.AddBook(this.bookForm.value);
-      this.resetForm();
-      this.toastr.success('Successfully added');
+      // this.bookApi.AddBook(this.bookForm.value);
+      this.bookApi.AddBookViaApi(this.bookForm.value).subscribe(() => {
+        this.resetForm();
+        this.toastr.success('Successfully added');
+      });
     } else {
       this.toastr.warning('Please complete the required fields');
     }
@@ -124,10 +130,13 @@ export class BookDetailComponent implements OnInit {
 
   updateBook() {
     if (this.bookForm.valid && this.bookForm.dirty) {
-      this.bookApi.UpdateBook(this.bookId, this.bookForm.value);
-      this.router.navigate(['book']);
-      this.dialog.closeAll();
-      this.toastr.success('Successfully updated');
+      // this.bookApi.UpdateBook(this.bookId, this.bookForm.value);
+      this.bookApi.UpdateBookViaApi(this.bookForm.value).subscribe(res => {
+        this.router.navigate(['book']);
+        this.dialog.closeAll();
+        this.toastr.success('Successfully updated');
+      });
+
     }
   }
 

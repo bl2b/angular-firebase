@@ -6,6 +6,10 @@ import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firest
 import { Router } from '@angular/router';
 import { User } from './user';
 import { ToastrService } from 'ngx-toastr';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { LoginRequest } from './loginrequest';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +23,8 @@ export class AuthService {
     public afs: AngularFirestore,   // Inject Firestore service
     public afAuth: AngularFireAuth, // Inject Firebase auth service
     public router: Router,
-    public ngZone: NgZone // NgZone service to remove outside scope warning
+    public ngZone: NgZone, // NgZone service to remove outside scope warning
+    private http: HttpClient
   ) {
 
   }
@@ -70,12 +75,13 @@ export class AuthService {
 
   // Returns true when user is looged in and email is verified
   get isLoggedIn(): boolean {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-      if (user.emailVerified === false && user.providerData[0].providerId === 'password') {
-        this.toastr.warning('We sent verifcation to your email. Please have it complete.');
-        return false;
-      }
+    // const user = JSON.parse(localStorage.getItem('jwt'));
+    const token = localStorage.getItem('jwt');
+    if (token) {
+      // if (user.emailVerified === false && user.providerData[0].providerId === 'password') {
+      //   this.toastr.warning('We sent verifcation to your email. Please have it complete.');
+      //   return false;
+      // }
       return true;
     } else {
       return false;
@@ -105,9 +111,6 @@ export class AuthService {
       });
   }
 
-  /* Setting up user data when sign in with username/password,
-  sign up with username/password and sign in with social auth
-  provider in Firestore database using AngularFirestore + AngularFirestoreDocument service */
   SetUserData(user) {
     const userRef: AngularFirestoreDocument<any> = this.afs.doc(`users/${user.uid}`);
     const userData: User = {
@@ -120,6 +123,47 @@ export class AuthService {
     this.userData = user;
     localStorage.setItem('user', JSON.stringify(this.userData));
 
+    user.getIdToken().then((theToken) => {
+      localStorage.setItem('jwt', theToken);
+      // const reqHeader = new HttpHeaders({
+      //   'Content-Type': 'application/json',
+      //   'Authorization': 'Bearer ' + theToken
+      // });
+      // this.http.get('/api/values/secrets', { headers: reqHeader }).subscribe({
+      //     next: () => {
+      //       this.toastr.success('Auth');
+      //       // let theUser = new CurrentUser();
+      //       // theUser.displayName = firebaseUser.displayName;
+      //       // theUser.email = firebaseUser.email;
+      //       // theUser.isSignedIn = true;
+      //       // localStorage.setItem("jwt", theToken);
+      //       // this.user$.next(theUser);
+      //     },
+      //     error: (err) => {
+      //       console.log('inside the error from server', err);
+      //       // this.doSignedOutUser()
+      //     }
+      //   });
+      // this.http.post('/api/values/verify', { token: theToken }).subscribe({
+      //   next: () => {
+      //     this.toastr.success('Auth');
+      //     // let theUser = new CurrentUser();
+      //     // theUser.displayName = firebaseUser.displayName;
+      //     // theUser.email = firebaseUser.email;
+      //     // theUser.isSignedIn = true;
+      //     // localStorage.setItem("jwt", theToken);
+      //     // this.user$.next(theUser);
+      //   },
+      //   error: (err) => {
+      //     // console.log('inside the error from server', err);
+      //     // this.doSignedOutUser()
+      //   }
+      // });
+    }, (failReason) => {
+      // this.doSignedOutUser();
+    });
+
+
     return userRef.set(userData, {
       merge: true
     });
@@ -127,10 +171,24 @@ export class AuthService {
 
   // Sign out
   SignOut() {
-    return this.afAuth.auth.signOut().then(() => {
-      localStorage.removeItem('user');
-      this.router.navigate(['sign-in']);
-    });
+    // return this.afAuth.auth.signOut().then(() => {
+    //   localStorage.removeItem('user');
+    //   this.router.navigate(['sign-in']);
+    // });
+    localStorage.removeItem('jwt');
+    this.router.navigate(['sign-in']);
+  }
+
+  SignInViaApi(user, pass): Observable<string> {
+    const req: LoginRequest = {
+      username: user,
+      password: pass
+    };
+    return this.http.post('/api/authentication/login', req).pipe(
+      map((res: any) => {
+        return res.token;
+      })
+    );
   }
 
 }

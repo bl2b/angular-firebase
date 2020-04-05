@@ -1,3 +1,5 @@
+import { Language } from './language';
+
 export interface Book {
    $key?: string;
    book_name?: string;
@@ -6,5 +8,5 @@ export interface Book {
    publication_date?: Date;
    binding_type?: string;
    in_stock?: string;
-   languages?: Array<string>;
+   languages?: Language[]; // Array<string>;
 }

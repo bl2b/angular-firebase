@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { AuthService } from 'src/app/authenticaton/auth.service';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -12,8 +13,20 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 export class SignInComponent implements OnInit {
   constructor(
     public authService: AuthService,
+    private ngZone: NgZone,
+    private router: Router
   ) { }
 
   ngOnInit() {
-   }
+  }
+
+  login(user, pass) {
+    this.authService.SignInViaApi(user, pass).subscribe(token => {
+      localStorage.setItem('jwt', token);
+
+      this.ngZone.run(() => {
+        this.router.navigate(['book']);
+      });
+    });
+  }
 }

@@ -10,6 +10,8 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ToastrModule } from 'ngx-toastr';
 import { PagenotfoundComponent } from './pagenotfound/pagenotfound.component';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './authenticaton/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -24,8 +26,16 @@ import { PagenotfoundComponent } from './pagenotfound/pagenotfound.component';
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     AngularFirestoreModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    HttpClientModule
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true // there could be more httpInteceptors all organized together in a chain
+    }
+  ],
 })
 export class AppModule { }

@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Book } from './book';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from '@angular/fire/database';
+import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +13,9 @@ export class BookService {
   booksRef: AngularFireList<any>;
   bookRef: AngularFireObject<any>;
 
-  constructor(private db: AngularFireDatabase) {}
+  constructor(
+    private db: AngularFireDatabase,
+    private http: HttpClient) {}
 
   /* Create book */
   AddBook(book: Book) {
@@ -63,6 +68,47 @@ export class BookService {
     .catch(error => {
       this.errorMgmt(error);
     });
+  }
+
+// ============== API CALL ================
+  AddBookViaApi(book: Book): Observable<string> {
+    return this.http.post('/api/book/add', book).pipe(
+      map((res: string) => {
+        return res;
+      })
+    );
+  }
+
+  GetBookViaApi(bookId: string): Observable<Book> {
+    return this.http.get<Book>(`/api/book/${bookId}`).pipe(
+      map((res: Book) => {
+        return res;
+      })
+    );
+  }
+
+  GetBookListViaApi(): Observable<Book[]> {
+    return this.http.get<Book[]>('/api/book').pipe(
+      map((res: Book[]) => {
+        return res;
+      })
+    );
+  }
+
+  UpdateBookViaApi(book: Book): Observable<string> {
+    return this.http.put('/api/book/update', book).pipe(
+      map((res: string) => {
+        return res;
+      })
+    );
+  }
+
+  DeleteBookListViaApi(bookId: string): Observable<string> {
+    return this.http.delete(`/api/book/${bookId}`).pipe(
+      map((res: string) => {
+        return res;
+      })
+    );
   }
 
   // Error management

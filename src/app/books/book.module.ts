@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { AngularMaterialModule } from '../material.module';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { LayoutModule } from '../layout/layout.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     declarations: [
